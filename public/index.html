@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PhotoMapper</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default">
+    </script>
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <script src="./js/index.js"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="form">
+        <form method='post' action='upload' enctype="multipart/form-data">
+          <label for='file'>Select a file to upload:</label><br />
+          <input type='file' name='file' /><br />
+          <input type='submit' />
+        </form>
+      </div>
+    <script defer type = "text/javascript"
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBG6ANLuAY4ClNs1k-p6-qH8xkh_vJlDTA&callback=initMap">
+
+  console.log(`Outside my JS module`);
+</script>    
+
+<script type="module">
+  console.log(`In my JS module`);
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+  
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getFirestore, doc, getDoc, getDocs, query, collection, onSnapshot } from  'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+      apiKey: "AIzaSyBLLhvYor_pevEXirUeuD3sH6Bv78lCamc",
+      authDomain: "zdscofie-sp23-41200-cls-pm.firebaseapp.com",
+      projectId: "zdscofie-sp23-41200-cls-pm",
+      storageBucket: "zdscofie-sp23-41200-cls-pm.appspot.com",
+      messagingSenderId: "1078193754860",
+      appId: "1:1078193754860:web:b22cbda1c6bb9e2e664bc9"
+    };
+
+  // Initialize Firebase
+  const fbapp = initializeApp(firebaseConfig);
+  console.log(`Initialized Firebase`);
+
+  // Access the Firestore database 
+  const db = getFirestore(fbapp);
+
+  // Test query the documents in the photos collection
+  const q = query(collection(db, "photos"));
+
+ // SET THE BOUNDARIES OF THE MAP
+  // const bounds = new google.maps.LatLngBounds();
+
+  // Create a snapshot of the database based on this query
+  // const querySnapshot = await getDocs(q);
+
+  // Set an array of markers on the map
+  let markersArray = [];
+
+  // Create a listener function that watches a snapshot based on a query
+
+  const listener = onSnapshot(q, (querySnapshot) => {
+
+    // SET THE BOUNDARIES OF THE MAP
+    const bounds = new google.maps.LatLngBounds();
+
+    // CLEAR EXISTING MARKERS FROM THE MAP
+    markersArray.forEach((marker) => {
+      console.log('Deleting marker!');
+      marker.setMap(null);
+    });
+
+    // LOOP THROUGH THE DOCUMENTS FOUND IN THE SNAPSHOT
+    querySnapshot.forEach((doc) => {
+        console.log(`thumblink ${doc.data().smallLink}`);
+const photoLat = Number(doc.data().exifData.gpsInDecimal.lat);
+const photoLon = doc.data().exifData.gpsInDecimal.lon;
+
+    // CREATE A NEW LatLng OBJECT WITH THE PHOTO'S LAT/LON
+    const myLatLng = { lat: photoLat, lng: photoLon};
+
+    // EXTEND THE MAP BOUNDS TO ENCOMPASS THIS POINT
+    const loc = new google.maps.LatLng(photoLat, photoLon);
+    bounds.extend(loc);
+
+    // PLACE THE MARKER WHERE THE THUMBNAIL IMAGE WILL GO
+    const marker = new google.maps.Marker({
+      position: myLatLng,
+      map,
+      title: "Hello, world!",
+      icon: doc.data().smallLink
+    });
+  
+    console.log('Adding marker to map!');
+    markersArray.push(marker);
+
+    }); // End of forEach loop over the documents
+  // MOVE AND RECENTER THE MAP TO FIT THE BOUNDARIES
+  map.fitBounds(bounds);
+  map.panToBounds(bounds);
+  if (map.zoom > 15) {
+    map.setZoom(15);
+  }
+});
+</script>
+
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
